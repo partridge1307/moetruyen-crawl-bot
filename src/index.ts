@@ -1,10 +1,10 @@
 import 'dotenv/config';
+import axios from 'axios';
 import { CronJob } from 'cron';
 import { filterExistedChapters } from './chapter';
 import { fetchImages } from './crawl/image';
 import { fetchMangasInfo } from './manga';
 import { createChapterImage } from './upload';
-import axios from 'axios';
 
 const TIME_ZONE = 'Asia/Ho_Chi_Minh';
 

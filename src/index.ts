@@ -19,32 +19,42 @@ const execute = async () => {
   const mangas = await fetchMangasInfo();
   const filtredMangas = await filterExistedChapters(mangas);
 
-  log(`Loaded ${mangas.length} from config`);
+  log(`Loaded ${mangas.length} mangas from config`);
 
   for (const manga of filtredMangas) {
     for (const chapter of manga.chapters) {
-      log(
+      await log(
         `Start fetching Chapter ${chapter.index}\nFrom ${manga.metadata.id}\nURL: ${chapter.url}`
       );
 
       const images = await fetchImages(chapter.url);
 
       if (!images?.length) {
-        log(`Could not fetch ${chapter.index}'s images\nIgnored`);
+        await log(`Could not fetch ${chapter.index}'s images\nIgnored`);
         continue;
       }
 
-      log(`Fetched ${images.length} images`);
+      await log(`Fetched ${images.length} images`);
 
-      await createChapterImage(images, manga.metadata.target, chapter.index);
+      const createdChapter = await createChapterImage(
+        images,
+        manga.metadata.target,
+        chapter.index
+      );
+      if (!createdChapter) {
+        await log(
+          `Error while create chapter ${chapter.index}\nURL: ${chapter.url}`
+        );
+        continue;
+      }
 
-      log(
-        `Uploaded Chapter ${chapter.index}\nFrom: ${manga.metadata.id}\nMangaId: ${manga.metadata.target}`
+      await log(
+        `Uploaded Chapter ${chapter.index}\nFrom: ${manga.metadata.id}\nMangaId: ${manga.metadata.target}. Result: ${process.env.MOE_URL}/chapter/${createdChapter.id}`
       );
     }
   }
 
-  log('Job Done!');
+  await log('Job Done!');
 };
 
 const job = new CronJob('0 * * * *', execute, null, true, TIME_ZONE);

@@ -15,6 +15,7 @@ declare global {
       CB_URL_ENDPOINT: string;
       CB_REGION: string;
       CB_BUCKET: string;
+      MOE_URL: string;
       WH_URL: string;
     }
   }

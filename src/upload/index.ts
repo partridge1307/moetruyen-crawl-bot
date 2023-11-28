@@ -64,12 +64,13 @@ const createChapterImage = async (
       createdChapter.id
     );
 
-    await db.chapter.update({
+    return await db.chapter.update({
       where: {
         id: createdChapter.id,
       },
       data: {
         isPublished: true,
+        progress: 'SUCCESS',
         images: uploaded_images,
       },
     });

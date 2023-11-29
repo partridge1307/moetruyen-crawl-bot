@@ -5,6 +5,7 @@ import { filterExistedChapters } from './chapter';
 import { fetchImages } from './crawl/image';
 import { fetchMangasInfo } from './manga';
 import { createChapterImage } from './upload';
+import type { Chapter } from '@prisma/client';
 
 const TIME_ZONE = 'Asia/Ho_Chi_Minh';
 
@@ -22,41 +23,37 @@ const execute = async () => {
   log(`Loaded ${mangas.length} mangas from config`);
 
   for (const manga of filtredMangas) {
-    for (const chapter of manga.chapters) {
-      await log(
-        `Start fetching Chapter ${chapter.index}\nFrom ${manga.metadata.id}\nURL: ${chapter.url}`
-      );
+    log(`Start crawling ${manga.metadata.id}`);
 
+    const promises = manga.chapters.map(async (chapter) => {
       const images = await fetchImages(chapter.url);
-
-      if (!images?.length) {
-        await log(`Could not fetch ${chapter.index}'s images\nIgnored`);
-        continue;
-      }
-
-      await log(`Fetched ${images.length} images`);
+      if (!images?.length) return;
 
       const createdChapter = await createChapterImage(
         images,
         manga.metadata.target,
         chapter.index
       );
-      if (!createdChapter) {
-        await log(
-          `Error while create chapter ${chapter.index}\nURL: ${chapter.url}`
-        );
-        continue;
-      }
 
-      await log(
-        `Uploaded Chapter ${chapter.index}\nFrom: ${manga.metadata.id}\nMangaId: ${manga.metadata.target}. Result: ${process.env.MOE_URL}/chapter/${createdChapter.id}`
-      );
-    }
+      return createdChapter;
+    });
+
+    const createdChapters = (await Promise.all(promises)).filter(
+      Boolean
+    ) as Chapter[];
+
+    await log(
+      `Uploaded ${createdChapters.length}\nFrom: ${
+        manga.metadata.id
+      }\nURL: [${createdChapters.map(
+        (chapter) => `${process.env.MOE_URL}/chapter/${chapter.id}`
+      )}]`
+    );
   }
 
   await log('Job Done!');
 };
 
-const job = new CronJob('0 * * * *', execute, null, true, TIME_ZONE);
+const job = new CronJob('30 * * * *', execute, null, true, TIME_ZONE);
 
 job.start();

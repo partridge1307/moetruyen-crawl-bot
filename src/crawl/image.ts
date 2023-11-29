@@ -28,9 +28,7 @@ const fetchImagesAPI = async (chapter_url: string) => {
     .map((_, image) => image.attribs['src'])
     .toArray();
 
-  const promises = images_url
-    .slice(1, images_url.length)
-    .map((url) => fetchInvidualImage(url));
+  const promises = images_url.map((url) => fetchInvidualImage(url));
   const images = (await Promise.all(promises)).filter(Boolean) as ArrayBuffer[];
 
   return images;

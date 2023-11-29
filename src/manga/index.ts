@@ -1,6 +1,5 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { parse } from 'date-fns';
 import { retryFunction } from '../lib/utils';
 import { MangaInfo, Metadata } from '../types';
 
@@ -26,7 +25,6 @@ const fetchMangaInfoAPI = async (
       return {
         url: `${process.env.CRAWL_URL}${url}`,
         index: +chapterIndex[0],
-        time: parse(dateTime, 'dd/MM/yyyy', new Date()),
       };
     })
     .toArray();

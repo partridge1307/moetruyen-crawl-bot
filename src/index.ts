@@ -1,11 +1,10 @@
-import 'dotenv/config';
 import axios from 'axios';
 import { CronJob } from 'cron';
+import 'dotenv/config';
 import { filterExistedChapters } from './chapter';
 import { fetchImages } from './crawl/image';
 import { fetchMangasInfo } from './manga';
 import { createChapterImage } from './upload';
-import type { Chapter } from '@prisma/client';
 
 const TIME_ZONE = 'Asia/Ho_Chi_Minh';
 
@@ -25,9 +24,20 @@ const execute = async () => {
   for (const manga of filtredMangas) {
     await log(`Start crawling ${manga.metadata.id}`);
 
-    const promises = manga.chapters.map(async (chapter) => {
+    if (!manga.chapters.length) {
+      await log(`Nothing to fetch`);
+      continue;
+    }
+
+    for (const chapter of manga.chapters) {
       const images = await fetchImages(chapter.url);
-      if (!images?.length) return;
+
+      if (!images?.length) {
+        await log(
+          `Could not fetch ${chapter.index}'s images. MangaId: ${manga.metadata.id}`
+        );
+        continue;
+      }
 
       const createdChapter = await createChapterImage(
         images,
@@ -36,20 +46,12 @@ const execute = async () => {
         manga.metadata.team
       );
 
-      return createdChapter;
-    });
+      await log(
+        `Uploaded ${chapter.index} From: ${manga.metadata.id}. URL: ${process.env.MOE_URL}/chapter/${createdChapter?.id}`
+      );
+    }
 
-    const createdChapters = (await Promise.all(promises)).filter(
-      Boolean
-    ) as Chapter[];
-
-    await log(
-      `Uploaded ${createdChapters.length}\nFrom: ${
-        manga.metadata.id
-      }\nURL: [\n${createdChapters
-        .map((chapter) => `${process.env.MOE_URL}/chapter/${chapter.id}`)
-        .join('\n')}\n]`
-    );
+    await log(`Crawl done. Switching to next manga`);
   }
 
   await log('Job Done!');

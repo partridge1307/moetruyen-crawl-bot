@@ -48,7 +48,8 @@ const uploadImages = async (
 const createChapterImage = async (
   images: ArrayBuffer[],
   mangaId: number,
-  index: number
+  index: number,
+  teamId?: number
 ) => {
   try {
     const createdChapter = await db.chapter.create({
@@ -72,6 +73,7 @@ const createChapterImage = async (
         isPublished: true,
         progress: 'SUCCESS',
         images: uploaded_images,
+        teamId,
       },
     });
   } catch (error) {

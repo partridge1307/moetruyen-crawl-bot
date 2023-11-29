@@ -20,10 +20,10 @@ const execute = async () => {
   const mangas = await fetchMangasInfo();
   const filtredMangas = await filterExistedChapters(mangas);
 
-  log(`Loaded ${mangas.length} mangas from config`);
+  await log(`Loaded ${mangas.length} mangas from config`);
 
   for (const manga of filtredMangas) {
-    log(`Start crawling ${manga.metadata.id}`);
+    await log(`Start crawling ${manga.metadata.id}`);
 
     const promises = manga.chapters.map(async (chapter) => {
       const images = await fetchImages(chapter.url);
@@ -32,7 +32,8 @@ const execute = async () => {
       const createdChapter = await createChapterImage(
         images,
         manga.metadata.target,
-        chapter.index
+        chapter.index,
+        manga.metadata.team
       );
 
       return createdChapter;
@@ -45,9 +46,9 @@ const execute = async () => {
     await log(
       `Uploaded ${createdChapters.length}\nFrom: ${
         manga.metadata.id
-      }\nURL: [${createdChapters.map(
-        (chapter) => `${process.env.MOE_URL}/chapter/${chapter.id}`
-      )}]`
+      }\nURL: [\n${createdChapters
+        .map((chapter) => `${process.env.MOE_URL}/chapter/${chapter.id}`)
+        .join('\n')}\n]`
     );
   }
 

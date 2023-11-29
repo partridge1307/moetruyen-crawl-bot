@@ -16,7 +16,6 @@ const fetchMangaInfoAPI = async (
       const root = $(chapter);
 
       const url = chapter.attribs['href'];
-      const dateTime = root.find('.time').text();
 
       const plainChapterIndex = root.find('span').text();
       const chapterIndex = plainChapterIndex.match(/[\d.]+/);

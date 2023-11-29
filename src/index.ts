@@ -43,6 +43,7 @@ const execute = async () => {
         images,
         manga.metadata.target,
         chapter.index,
+        chapter.name,
         manga.metadata.team
       );
 

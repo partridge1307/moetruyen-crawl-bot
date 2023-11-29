@@ -16,14 +16,17 @@ const fetchMangaInfoAPI = async (
       const root = $(chapter);
 
       const url = chapter.attribs['href'];
-
       const plainChapterIndex = root.find('span').text();
+
+      const name = plainChapterIndex.split(' ').slice(2).join(' ');
+
       const chapterIndex = plainChapterIndex.match(/[\d.]+/);
       if (!chapterIndex) return;
 
       return {
         url: `${process.env.CRAWL_URL}${url}`,
         index: +chapterIndex[0],
+        name,
       };
     })
     .toArray();

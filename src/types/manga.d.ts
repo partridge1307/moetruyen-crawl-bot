@@ -7,6 +7,7 @@ export type Metadata = {
 export type ChapterInfo = {
   url: string;
   index: number;
+  name: string;
 };
 
 export type MangaInfo = {

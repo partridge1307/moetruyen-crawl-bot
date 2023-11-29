@@ -1,8 +1,8 @@
-import sharp from 'sharp';
-import { resizeImage, sendCommand } from '../lib/utils';
-import { contabo } from '../lib/contabo';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
+import sharp from 'sharp';
+import { contabo } from '../lib/contabo';
 import { db } from '../lib/db';
+import { resizeImage, sendCommand } from '../lib/utils';
 
 const uploadImages = async (
   images: ArrayBuffer[],
@@ -49,6 +49,7 @@ const createChapterImage = async (
   images: ArrayBuffer[],
   mangaId: number,
   index: number,
+  name: string,
   teamId?: number
 ) => {
   try {
@@ -57,6 +58,7 @@ const createChapterImage = async (
         chapterIndex: index,
         volume: 1,
         mangaId,
+        name,
       },
     });
     const uploaded_images = await uploadImages(
